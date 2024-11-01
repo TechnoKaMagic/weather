@@ -38,18 +38,18 @@ class Locationprovider with ChangeNotifier {
       notifyListeners();
       return;
     }
-    _currentPosition = await Geolocator.getCurrentPosition();
-    print(_currentPosition);
+
+    // Get the current position
+    _currentPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    
+    // Print the latitude and longitude
+    print('Latitude: ${_currentPosition?.latitude}');
+    print('Longitude: ${_currentPosition?.longitude}');
+
     notifyListeners();
 
-
+    // Get the current location name
     _currentLocationName = await _locationService.getLocationName(_currentPosition);
     print(_currentLocationName);
   }
-
-//ask  the permisstion
-
-//get the location
-
-//get the placemark
 }
