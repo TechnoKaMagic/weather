@@ -1,15 +1,16 @@
+ 
 import 'package:flutter/cupertino.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/services/Location_Service.dart';
 
-class Locationprovider with ChangeNotifier {
+class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
-  Position? get currentPosition => _currentPosition;
-
+  Position? get currentPostion => _currentPosition;
   final LocationService _locationService = LocationService();
+
   Placemark? _currentLocationName;
-  Placemark? get currentLocation => _currentLocationName;
+  Placemark? get currentLocationName => _currentLocationName;
 
   Future<void> determinePosition() async {
     bool serviceEnabled;
@@ -24,32 +25,37 @@ class Locationprovider with ChangeNotifier {
     }
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
 
     if (permission == LocationPermission.denied) {
-      _currentPosition = null;
-      notifyListeners();
-      return;
+      permission = await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        _currentPosition = null;
+        notifyListeners();
+        return;
+      }
     }
+
     if (permission == LocationPermission.deniedForever) {
       _currentPosition = null;
       notifyListeners();
       return;
     }
 
-    // Get the current position
-    _currentPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    
-    // Print the latitude and longitude
-    print('Latitude: ${_currentPosition?.latitude}');
-    print('Longitude: ${_currentPosition?.longitude}');
+    _currentPosition = await Geolocator.getCurrentPosition();
+    //print(_currentPosition);
+
+    _currentLocationName =
+        await _locationService.getLocationName(_currentPosition);
+
+    print(_currentLocationName);
 
     notifyListeners();
-
-    // Get the current location name
-    _currentLocationName = await _locationService.getLocationName(_currentPosition);
-    print(_currentLocationName);
   }
+
+  // ask the permission
+
+  // get the location
+
+  // get the placemark
 }

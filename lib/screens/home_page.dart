@@ -5,6 +5,7 @@ import 'package:weather_app/Bottomsectionrefact.dart';
 import 'package:weather_app/Widgets.dart';
 import 'package:weather_app/data/images.dart';
 import 'package:weather_app/services/LocationProvider.dart';
+import 'package:weather_app/services/weatherService_Provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,14 +17,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _isSearching = false; // State variable to track search state
 
-@override
-void initState(){
-    Provider.of<Locationprovider>(context,listen: false).determinePosition();
+  @override
+  void initState() {
+    Provider.of<LocationProvider>(context, listen: false).determinePosition();
     super.initState();
-}
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final locationProvider = Provider.of<LocationProvider>(context);
+    final weatherProvider = Provider.of<WeatherServiceProvider>(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -32,21 +36,6 @@ void initState(){
         leading: Icon(Icons.location_pin, color: Colors.red, size: 30),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Current Location",
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            Text(
-              "Good Morning",
-              style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white),
-            ),
-          ],
         ),
         titleSpacing: 0,
         actions: [
@@ -76,6 +65,30 @@ void initState(){
         ),
         child: Stack(
           children: [
+            Container(
+              child: Consumer<LocationProvider> (
+                builder: (context,locationProvider,child){
+                    return Padding(
+                padding: const EdgeInsets.only(top: 40, left: 45),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text( locationProvider.currentLocationName?.locality ??    "Current Location",
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    Text(
+                      "Good Morning",
+                      style: TextStyle(fontSize: 12, color: Colors.white),
+                    ),
+                  ],
+                ),
+              );
+                },
+              ),
+            ),
             Align(
               alignment: Alignment(0, -0.6),
               child: Image.asset(
@@ -91,11 +104,23 @@ void initState(){
                 width: 150,
                 child: Column(
                   children: [
-                    TextW(text: "21 C", fontSize: 30, fontWeight: FontWeight.bold,),
-                    TextW(text: "Clouds", fontSize: 28, fontWeight: FontWeight.bold,),
-                    TextW(text: DateFormat('hh:mm a')
-                        .format(DateTime.now())
-                        .toString(), fontSize: 20, fontWeight: FontWeight.bold,)
+                    TextW(
+                      text: "21 C",
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    TextW(
+                      text: "Clouds",
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    TextW(
+                      text: DateFormat('hh:mm a')
+                          .format(DateTime.now())
+                          .toString(),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    )
                   ],
                 ),
               ),
@@ -117,7 +142,7 @@ void initState(){
                             img: tempHigh,
                             labelText: "Temp Max",
                             value: "10" // Placeholder value
-                        ),
+                            ),
                         SizedBox(width: 24),
                         BottomInfo(
                             img: tempLow, labelText: "Temp Min", value: "20°C"),
@@ -127,9 +152,11 @@ void initState(){
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        BottomInfo(img: sun, labelText: "Sunrise", value: "31°C"),
+                        BottomInfo(
+                            img: sun, labelText: "Sunrise", value: "31°C"),
                         SizedBox(width: 60),
-                        BottomInfo(img: moon, labelText: "Sunset", value: "20°C")
+                        BottomInfo(
+                            img: moon, labelText: "Sunset", value: "20°C")
                       ],
                     ),
                   ],
