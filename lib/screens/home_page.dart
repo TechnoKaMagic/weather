@@ -26,8 +26,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    final locationProvider = Provider.of<LocationProvider>(context);
-    final weatherProvider = Provider.of<WeatherServiceProvider>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -36,6 +35,20 @@ class _HomePageState extends State<HomePage> {
         leading: Icon(Icons.location_pin, color: Colors.red, size: 30),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Consumer<LocationProvider>(
+              builder: (context, locationProvider, child) {
+                return Text(
+                 locationProvider.currentLocationName?.locality ?? "Current Location",
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                );
+              },
+            ),
+            Text(
+              "Good Morning",
+              style: TextStyle(fontSize: 12, color: Colors.white),
+            ),
+          ],
         ),
         titleSpacing: 0,
         actions: [
@@ -65,30 +78,6 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Stack(
           children: [
-            Container(
-              child: Consumer<LocationProvider> (
-                builder: (context,locationProvider,child){
-                    return Padding(
-                padding: const EdgeInsets.only(top: 40, left: 45),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text( locationProvider.currentLocationName?.locality ??    "Current Location",
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    Text(
-                      "Good Morning",
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ],
-                ),
-              );
-                },
-              ),
-            ),
             Align(
               alignment: Alignment(0, -0.6),
               child: Image.asset(
@@ -104,20 +93,22 @@ class _HomePageState extends State<HomePage> {
                 width: 150,
                 child: Column(
                   children: [
-                    TextW(
-                      text: "21 C",
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+                    Consumer<WeatherServiceProvider>(
+                      builder: (context, weatherProvider, child) {
+                        return TextW(
+                          text: "--°C",
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        );
+                      },
                     ),
                     TextW(
-                      text: "Clouds",
+                      text: "Clouds", // Adjust based on actual weather description
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                     TextW(
-                      text: DateFormat('hh:mm a')
-                          .format(DateTime.now())
-                          .toString(),
+                      text: DateFormat('hh:mm a').format(DateTime.now()).toString(),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     )
@@ -138,25 +129,34 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        BottomInfo(
-                            img: tempHigh,
-                            labelText: "Temp Max",
-                            value: "10" // Placeholder value
-                            ),
+                        Consumer<WeatherServiceProvider>(
+                          builder: (context, weatherProvider, child) {
+                            return BottomInfo(
+                              img: tempHigh,
+                              labelText: "Temp Max",
+                              value: " --°C",
+                            );
+                          },
+                        ),
                         SizedBox(width: 24),
-                        BottomInfo(
-                            img: tempLow, labelText: "Temp Min", value: "20°C"),
+                        Consumer<WeatherServiceProvider>(
+                          builder: (context, weatherProvider, child) {
+                            return BottomInfo(
+                              img: tempLow,
+                              labelText: "Temp Min",
+                              value: "--°C",
+                            );
+                          },
+                        ),
                       ],
                     ),
                     Divider(color: Colors.white, thickness: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        BottomInfo(
-                            img: sun, labelText: "Sunrise", value: "31°C"),
+                        BottomInfo(img: sun, labelText: "Sunrise", value: "6:30 AM"), // Example static time
                         SizedBox(width: 60),
-                        BottomInfo(
-                            img: moon, labelText: "Sunset", value: "20°C")
+                        BottomInfo(img: moon, labelText: "Sunset", value: "7:30 PM"), // Example static time
                       ],
                     ),
                   ],
