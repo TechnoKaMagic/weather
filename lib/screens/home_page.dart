@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:weather/weather.dart';
 import 'package:weather_app/Bottomsectionrefact.dart';
 import 'package:weather_app/Widgets.dart';
 import 'package:weather_app/data/images.dart';
+import 'package:weather_app/secrets/api.dart';
 import 'package:weather_app/services/LocationProvider.dart';
 import 'package:weather_app/services/weatherService_Provider.dart';
 
@@ -16,16 +18,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isSearching = false; // State variable to track search state
+  final WeatherFactory _wf = WeatherFactory(OPENWEATHER_API_KEY);
+  Weather? _weather;
 
   @override
   void initState() {
     Provider.of<LocationProvider>(context, listen: false).determinePosition();
     super.initState();
+    _wf.currentWeatherByCityName("Alappuzha").then((w) {
+      setState(() {
+        _weather = w;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
+
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -36,13 +47,8 @@ class _HomePageState extends State<HomePage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Consumer<LocationProvider>(
-              builder: (context, locationProvider, child) {
-                return Text(
-                 locationProvider.currentLocationName?.locality ?? "Current Location",
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
-                );
-              },
+            Text(  "Current Location",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             Text(
               "Good Morning",
@@ -89,22 +95,22 @@ class _HomePageState extends State<HomePage> {
             Align(
               alignment: Alignment(0, 0),
               child: Container(
-                height: 150,
-                width: 150,
+                height: 170,
+                width: 170,
                 child: Column(
                   children: [
                     Consumer<WeatherServiceProvider>(
                       builder: (context, weatherProvider, child) {
                         return TextW(
-                          text: "--°C",
+                          text: "${_weather?.temperature?.celsius?.toStringAsFixed(0)}°C" ,
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
                         );
                       },
                     ),
                     TextW(
-                      text: "Clouds", // Adjust based on actual weather description
-                      fontSize: 28,
+                      text: "${_weather?.weatherDescription}", // Adjust based on actual weather description
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                     TextW(
@@ -134,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                             return BottomInfo(
                               img: tempHigh,
                               labelText: "Temp Max",
-                              value: " --°C",
+                              value: "${ _weather?.tempMax?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
                             );
                           },
                         ),
@@ -144,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                             return BottomInfo(
                               img: tempLow,
                               labelText: "Temp Min",
-                              value: "--°C",
+                              value: "${ _weather?.tempMin?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
                             );
                           },
                         ),
