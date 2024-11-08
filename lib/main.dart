@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/screens/home_page.dart';
-import 'package:weather_app/services/LocationProvider.dart';
-import 'package:weather_app/services/weatherService_Provider.dart';
+import 'package:weather_app/services/location_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context)=> LocationProvider()),
-        ChangeNotifierProvider(create: (context)=> WeatherServiceProvider()),
-          ChangeNotifierProvider(create: (_) => LocationProvider()),
+       ChangeNotifierProvider(create: (_) => LocationProvider()),
+ 
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

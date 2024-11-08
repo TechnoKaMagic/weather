@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/Widgets.dart';
-import 'package:weather_app/data/images.dart';
 
 class BottomInfo extends StatelessWidget {
   final String labelText;

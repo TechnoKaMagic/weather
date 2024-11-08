@@ -6,8 +6,7 @@ import 'package:weather_app/Bottomsectionrefact.dart';
 import 'package:weather_app/Widgets.dart';
 import 'package:weather_app/data/images.dart';
 import 'package:weather_app/secrets/api.dart';
-import 'package:weather_app/services/LocationProvider.dart';
-import 'package:weather_app/services/weatherService_Provider.dart';
+import 'package:weather_app/services/location_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,12 +19,16 @@ class _HomePageState extends State<HomePage> {
   bool _isSearching = false; // State variable to track search state
   final WeatherFactory _wf = WeatherFactory(OPENWEATHER_API_KEY);
   Weather? _weather;
-
+  final TextEditingController _searchConroller = TextEditingController();
   @override
   void initState() {
     Provider.of<LocationProvider>(context, listen: false).determinePosition();
     super.initState();
-    _wf.currentWeatherByCityName("Alappuzha").then((w) {
+    fetchWeather("alappuzha");
+  }
+
+  void fetchWeather(String cityName) {
+    _wf.currentWeatherByCityName(cityName).then((w) {
       setState(() {
         _weather = w;
       });
@@ -35,22 +38,54 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    print(_weather);
+    print(_weather?.sunrise);
 
+// Assuming _weather?.sunrise and _weather?.sunset are DateTime objects
+    DateTime? sunrise = _weather?.sunrise;
+    DateTime? sunset = _weather?.sunset;
 
+    String formattedSunrise =
+        sunrise != null ? DateFormat('h:mm a').format(sunrise) : "N/A";
+    String formattedSunset =
+        sunset != null ? DateFormat('h:mm a').format(sunset) : "N/A";
+
+// Print formatted times
+    print("Sunrise: $formattedSunrise");
+    print("Sunset: $formattedSunset");
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         elevation: 0, // Set elevation to 0 for a clean look
         backgroundColor: Colors.transparent,
-        leading: Icon(Icons.location_pin, color: Colors.red, size: 30),
+        leading: IconButton(
+            onPressed: () {
+              print("location searching");
+              setState(() {
+                _HomePageState();
+              });
+            },
+            icon: const Icon(
+              Icons.location_pin,
+              size: 30,
+              color: Colors.red,
+            )),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(  "Current Location",
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+            Consumer<LocationProvider>(
+              builder: (context, locationProvider, child) {
+                return Text(
+                  locationProvider.locationName ?? "Fetching location...",
+                  style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                );
+              },
             ),
-            Text(
+            const Text(
               "Good Morning",
               style: TextStyle(fontSize: 12, color: Colors.white),
             ),
@@ -64,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                   _isSearching = !_isSearching; // Toggle the search state
                 });
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.search,
                 color: Colors.white,
                 size: 30,
@@ -78,43 +113,48 @@ class _HomePageState extends State<HomePage> {
           image: DecorationImage(
             fit: BoxFit.cover,
             image: AssetImage(
-              Bg["Rain"],
+              Bg["${_weather?.weatherMain}"],
             ),
           ),
         ),
         child: Stack(
           children: [
             Align(
-              alignment: Alignment(0, -0.6),
+              alignment: const Alignment(0, -0.6),
               child: Image.asset(
-                WeatherIcons["Clouds"],
-                height: 150,
-                width: 150,
+                 WeatherIcons["${_weather?.weatherMain}"]  ?? WeatherIcons["Error"],
+                height: 200,
+                width: 200,
               ),
             ),
             Align(
-              alignment: Alignment(0, 0),
+              alignment: const Alignment(0, 0),
               child: Container(
                 height: 170,
-                width: 170,
+                width: MediaQuery.sizeOf(context).width,
                 child: Column(
                   children: [
-                    Consumer<WeatherServiceProvider>(
-                      builder: (context, weatherProvider, child) {
-                        return TextW(
-                          text: "${_weather?.temperature?.celsius?.toStringAsFixed(0)}°C" ,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        );
-                      },
+                    TextW(
+                      text:
+                          "${_weather?.temperature?.celsius?.toStringAsFixed(0)}°C",
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                     ),
                     TextW(
-                      text: "${_weather?.weatherDescription}", // Adjust based on actual weather description
+                      text: "${_weather?.areaName}",
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    TextW(
+                      text:
+                          "${_weather?.weatherDescription}", // Adjust based on actual weather description
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                     TextW(
-                      text: DateFormat('hh:mm a').format(DateTime.now()).toString(),
+                      text: DateFormat('hh:mm a')
+                          .format(DateTime.now())
+                          .toString(),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     )
@@ -123,7 +163,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Align(
-              alignment: Alignment(0, 0.75),
+              alignment: const Alignment(0, 0.75),
               child: Container(
                 decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.4),
@@ -135,47 +175,49 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Consumer<WeatherServiceProvider>(
-                          builder: (context, weatherProvider, child) {
-                            return BottomInfo(
-                              img: tempHigh,
-                              labelText: "Temp Max",
-                              value: "${ _weather?.tempMax?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
-                            );
-                          },
-                        ),
-                        SizedBox(width: 24),
-                        Consumer<WeatherServiceProvider>(
-                          builder: (context, weatherProvider, child) {
-                            return BottomInfo(
-                              img: tempLow,
-                              labelText: "Temp Min",
-                              value: "${ _weather?.tempMin?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
-                            );
-                          },
-                        ),
+                        BottomInfo(
+                            img: tempHigh,
+                            labelText: "Temp Max",
+                            value:
+                                "${_weather?.tempMax?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
+                            ),
+                        const SizedBox(width: 24),
+                        BottomInfo(
+                            img: tempLow,
+                            labelText: "Temp Min",
+                            value:
+                                "${_weather?.tempMin?.celsius?.toStringAsFixed(0)}\u00b0C" //?? " --°C",
+                            ),
                       ],
                     ),
-                    Divider(color: Colors.white, thickness: 2),
+                    const Divider(color: Colors.white, thickness: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        BottomInfo(img: sun, labelText: "Sunrise", value: "6:30 AM"), // Example static time
+                        BottomInfo(
+                            img: sun,
+                            labelText: "Sunrise",
+                            value:
+                                formattedSunrise), // Example static time
                         SizedBox(width: 60),
-                        BottomInfo(img: moon, labelText: "Sunset", value: "7:30 PM"), // Example static time
+                        BottomInfo(
+                            img: moon,
+                            labelText: "Sunset",
+                            value: formattedSunset), // Example static time
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            // TextFormField appears here based on _isSearching
+              // TextFormField appears here based on _isSearching
             if (_isSearching) // Show the TextFormField if searching
               Align(
                 alignment: Alignment(0, -0.5), // Adjust alignment as needed
                 child: Container(
                   width: 300, // Adjust width as needed
                   child: TextFormField(
+                    controller: _searchConroller,
                     decoration: InputDecoration(
                       hintText: 'Search for a city',
                       filled: true,
@@ -185,6 +227,15 @@ class _HomePageState extends State<HomePage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    onFieldSubmitted: (value) {
+                      if (value.isNotEmpty) {
+                        fetchWeather(value);
+                        setState(() {
+                          _isSearching = false;
+                          _searchConroller.clear();
+                        });
+                      }
+                    },
                   ),
                 ),
               ),
