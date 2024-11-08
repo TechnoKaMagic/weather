@@ -51,9 +51,13 @@ List<String> WIcons =[
   String moon = "assets/icons/moon.png";
 
 
+ String TempHigh = "assets/ICON/13.png";
+  String TempLow = "assets/ICON/14.png";
+  String Sun = "assets/ICON/11.png";
+  String Moon = "assets/ICON/12.png";
 
 
-
+String SnowAni = "assets/animation/snow.json";
 
 
 
@@ -71,4 +75,25 @@ List<String> WIcons =[
 
 
  
- 
+   //new weather icon try to feach from weather code
+  String getWeatherIcon(int? code) {
+  if (code == null) return 'assets/7.png'; // Fallback icon
+
+  if (code >= 200 && code < 300) {
+    return 'assets/ICON/1.png';
+  } else if (code >= 300 && code < 400) {
+    return 'assets/ICON/2.png';
+  } else if (code >= 500 && code < 600) {
+    return 'assets/ICON/3.png';
+  } else if (code >= 600 && code < 700) {
+    return 'assets/ICON/4.png';
+  } else if (code >= 700 && code < 800) {
+    return 'assets/ICON/5.png';
+  } else if (code == 800) {
+    return 'assets/ICON/6.png';
+  } else if (code > 800 && code <= 804) {
+    return 'assets/ICON/7.png';
+  } else {
+    return 'assets/ICON/7.png'; // Default icon
+  }
+}
