@@ -112,9 +112,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: AssetImage(
-              Bg["${_weather?.weatherMain}"],
-            ),
+image: AssetImage(Bg["${_weather?.weatherMain}"] ?? Bg["default"]),
           ),
         ),
         child: Stack(
@@ -122,7 +120,7 @@ class _HomePageState extends State<HomePage> {
             Align(
               alignment: const Alignment(0, -0.6),
               child: Image.asset(
-                 WeatherIcons["${_weather?.weatherMain}"]  ?? WeatherIcons["Error"],
+                WeatherIcons["${_weather?.weatherMain}"] ?? WeatherIcons["Error"],
                 height: 200,
                 width: 200,
               ),
